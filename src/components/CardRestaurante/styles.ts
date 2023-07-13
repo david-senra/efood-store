@@ -26,6 +26,7 @@ export const CardAtributosDiv = styled.div`
 export const TituloNotaDiv = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-right: 8px;
 `
 
 export const DescricaoCard = styled.p`
