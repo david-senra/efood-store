@@ -3,9 +3,9 @@ import { cores } from '../../styles'
 
 export const Hero = styled.header`
   width: 100%;
-  height: 384px;
+  height: 360px;
   text-align: center;
-  padding-top: 64px;
+  padding-top: 40px;
 `
 
 export const TituloHero = styled.h2`
