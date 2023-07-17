@@ -18,6 +18,11 @@ export const ListaRedesSociais = styled.ul`
   gap: 8px;
   justify-content: center;
   margin-top: 32.5px;
+  background-color: transparent;
+
+  li {
+    background-color: transparent;
+  }
 `
 
 export const LinkRedeSocial = styled.button`
@@ -26,6 +31,10 @@ export const LinkRedeSocial = styled.button`
   border: none;
   border-radius: 50%;
   background-color: transparent;
+
+  img {
+    background-color: transparent;
+  }
 `
 
 export const TextoFooter = styled.p`
@@ -35,4 +44,5 @@ export const TextoFooter = styled.p`
   margin-top: 80px;
   color: ${cores.rosaEscuro};
   width: 480px;
+  background-color: transparent;
 `

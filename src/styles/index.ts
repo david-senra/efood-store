@@ -3,13 +3,15 @@ import styled from 'styled-components'
 
 export const cores = {
   rosaEscuro: '#E66767',
-  rosaClaro: '#FFEBD9'
+  rosaClaro: '#FFEBD9',
+  rosaMaisClaro: '#FFF8F2'
 }
 
 export const Container = styled.div`
   max-width: 1024px;
   width: 100%;
   margin: 0 auto;
+  background-color: transparent;
 
   @media (max-width: 1024px) {
     max-width: 80%;
@@ -23,12 +25,14 @@ export const Titulo = styled.h3`
   font-size: 18px;
   font-weight: 700;
   line-height: 21px;
+  background-color: transparent;
 
   img {
     padding-left: 8px;
     height: 21px;
     vertical-align: middle;
     margin-bottom: 5px;
+    background-color: transparent;
   }
 `
 
@@ -39,6 +43,7 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     list-style: none;
     font-family: Roboto, sans-serif;
+    background-color: ${cores.rosaMaisClaro}
   }
 `
 

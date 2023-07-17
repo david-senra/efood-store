@@ -11,6 +11,7 @@ export const CardProduto = styled.div`
 export const ImagemProduto = styled.img`
   height: 168px;
   width: 100%;
+  background-color: transparent;
 `
 
 export const TituloProduto = styled.h3`
@@ -21,6 +22,7 @@ export const TituloProduto = styled.h3`
   line-height: 19px;
   margin-top: 8px;
   margin-bottom: 8px;
+  background-color: transparent;
 `
 
 export const DescricaoProduto = styled.p`
@@ -29,6 +31,7 @@ export const DescricaoProduto = styled.p`
   font-size: 14px;
   font-weight: 400;
   line-height: 22px;
+  background-color: transparent;
 `
 
 export const BotaoAdicionarCarrinho = styled.button`

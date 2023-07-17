@@ -9,6 +9,7 @@ export const DivBanner = styled.div`
 `
 
 export const TextoBanner = styled.h3`
+  background-color: transparent;
   position: absolute;
   font-size: 30px;
   color: #fff;
@@ -22,6 +23,7 @@ export const TituloBanner = styled(TextoBanner)`
   position: absolute;
   font-weight: 900;
   padding-top: 215px;
+  background-color: transparent;
 `
 
 export const DivEfeito = styled.div`

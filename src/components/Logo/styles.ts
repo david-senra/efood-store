@@ -7,14 +7,17 @@ export const LogoDiv = styled.div`
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+  background-color: transparent;
 `
 
 export const LogoButton = styled(Link)`
   width: 100%;
   height: 100%;
+  background-color: transparent;
 `
 
 export const LogoStyle = styled.img`
   width: 100%;
   height: 100%;
+  background-color: transparent;
 `

@@ -5,7 +5,7 @@ export const Hero = styled.header`
   width: 100%;
   height: 384px;
   text-align: center;
-  padding-top: 40px;
+  padding-top: 64px;
 `
 
 export const TituloHero = styled.h2`
@@ -13,9 +13,9 @@ export const TituloHero = styled.h2`
   width: 539px;
   margin: 0 auto;
   margin-top: 138.5px;
-  margin-bottom: 40px;
   color: ${cores.rosaEscuro};
   font-size: 36px;
   font-weight: 900;
   line-height: 42px;
+  background-color: transparent;
 `
