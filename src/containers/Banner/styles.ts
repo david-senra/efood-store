@@ -4,6 +4,7 @@ export const DivBanner = styled.div`
   width: 100%;
   height: 280px;
   background-size: cover;
+  background-position: center;
   text-align: center;
   position: relative;
 `

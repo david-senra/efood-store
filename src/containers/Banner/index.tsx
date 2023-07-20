@@ -1,13 +1,28 @@
+import { useState, useEffect } from 'react'
+import { Restaurante } from '../../models/Restaurante'
 import * as S from './styles'
-import FundoImg from '../../assets/images/fundo-trattoria.png'
 import { Container } from '../../styles'
 
-export const Banner = () => (
-  <S.DivBanner style={{ backgroundImage: `url(${FundoImg})` }}>
-    <Container>
-      <S.TextoBanner>Italiana</S.TextoBanner>
-      <S.TituloBanner>La Dolce Vita Trattoria</S.TituloBanner>
-      <S.DivEfeito />
-    </Container>
-  </S.DivBanner>
-)
+type TipoBanner = {
+  id: number
+}
+
+export const Banner = ({ id }: TipoBanner) => {
+  const [restauranteAtual, setRestauranteAtual] = useState<Restaurante>()
+
+  useEffect(() => {
+    fetch(`https://fake-api-tau.vercel.app/api/efood/restaurantes/${id}`)
+      .then((res) => res.json())
+      .then((res) => setRestauranteAtual(res))
+  }, [id])
+
+  return (
+    <S.DivBanner style={{ backgroundImage: `url(${restauranteAtual?.capa})` }}>
+      <Container>
+        <S.TextoBanner>{restauranteAtual?.tipo}</S.TextoBanner>
+        <S.TituloBanner>{restauranteAtual?.titulo}</S.TituloBanner>
+        <S.DivEfeito />
+      </Container>
+    </S.DivBanner>
+  )
+}

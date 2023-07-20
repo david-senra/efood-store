@@ -13,6 +13,8 @@ export const ImagemDiv = styled.div`
   text-align: center;
   position: relative;
   background-color: #fff;
+  background-size: cover;
+  background-position: center;
 `
 
 export const CardAtributosDiv = styled.div`

@@ -4,7 +4,8 @@ import styled from 'styled-components'
 export const cores = {
   rosaEscuro: '#E66767',
   rosaClaro: '#FFEBD9',
-  rosaMaisClaro: '#FFF8F2'
+  rosaMaisClaro: '#FFF8F2',
+  branca: '#FFF'
 }
 
 export const Container = styled.div`
