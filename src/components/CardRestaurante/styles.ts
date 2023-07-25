@@ -1,10 +1,14 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { cores, breakpoints } from '../../styles'
 
 export const CardRestaurante = styled.div`
   display: block;
   height: 408px;
   background-color: #fff;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    height: 460px;
+  }
 `
 
 export const ImagemDiv = styled.div`
@@ -26,6 +30,10 @@ export const CardAtributosDiv = styled.div`
   flex-direction: column;
   justify-content: center;
   background-color: #fff;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    height: 240px;
+  }
 `
 
 export const TituloNotaDiv = styled.div`
@@ -44,4 +52,8 @@ export const DescricaoCard = styled.p`
   font-weight: normal;
   line-height: 22px;
   background-color: #fff;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    font-size: 13px;
+  }
 `

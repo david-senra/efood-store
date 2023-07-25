@@ -8,13 +8,18 @@ export const cores = {
   branca: '#FFF'
 }
 
+export const breakpoints = {
+  desktop: '1024px',
+  tablet: '768px'
+}
+
 export const Container = styled.div`
   max-width: 1024px;
   width: 100%;
   margin: 0 auto;
   background-color: transparent;
 
-  @media (max-width: 1024px) {
+  @media (max-width: ${breakpoints.desktop}) {
     max-width: 80%;
   }
 `
@@ -44,8 +49,13 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     list-style: none;
     font-family: Roboto, sans-serif;
-    background-color: ${cores.rosaMaisClaro}
+    background-color: ${cores.rosaMaisClaro};
   }
+
+  @media (max-width: ${breakpoints.desktop}) {
+    max-width: 80%;
+  }
+
 `
 
 export default GlobalStyle

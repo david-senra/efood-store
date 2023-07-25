@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { cores, breakpoints } from '../../styles'
 
 type ElementosCard = {
   isModal?: boolean
@@ -21,6 +21,25 @@ export const CardProduto = styled.div<ElementosCard>`
     padding-left: 24px;
     padding-bottom: 25px;
     height: 100%;
+
+    @media (max-width: ${breakpoints.tablet}) {
+      align-items: ${({ isModal }) => isModal && 'center'};
+      justify-content: ${({ isModal }) => isModal && 'start'};
+      padding: ${({ isModal }) => isModal && '0'};
+      gap: ${({ isModal }) => isModal && '15px'};
+    }
+  }
+
+  @media (max-width: ${breakpoints.tablet}) {
+    display: ${({ isModal }) => isModal && 'block'};
+    position: ${({ isModal }) => isModal && 'fixed'};
+    top: ${({ isModal }) => isModal && '40px'};
+    left: ${({ isModal }) => isModal && '35px'};
+    text-align: ${({ isModal }) => isModal && 'center'};
+    width: ${({ isModal }) => isModal && '80%'};
+    height: ${({ isModal }) => isModal && 'auto'};
+    margin: ${({ isModal }) => isModal && 'auto'};
+    padding-bottom: ${({ isModal }) => isModal && '62px'};
   }
 `
 
@@ -29,6 +48,13 @@ export const ImagemProduto = styled.img<ElementosCard>`
   width: ${({ isModal }) => (isModal ? '280px' : '100%')};
   background-color: transparent;
   object-fit: cover;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    height: ${({ isModal }) => isModal && 'auto'};
+    width: ${({ isModal }) => isModal && '90%'};
+    margin-top: ${({ isModal }) => isModal && '30px'};
+    margin-bottom: ${({ isModal }) => isModal && '5px'};
+  }
 `
 
 export const TituloProduto = styled.h3<ElementosCard>`
@@ -40,6 +66,12 @@ export const TituloProduto = styled.h3<ElementosCard>`
   margin-top: 8px;
   margin-bottom: 8px;
   background-color: transparent;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    font-size: ${({ isModal }) => isModal && '14px'};
+    width: ${({ isModal }) => isModal && '80%'};
+    margin-top: ${({ isModal }) => isModal && '10px'};
+  }
 `
 
 export const DescricaoProduto = styled.p<ElementosCard>`
@@ -49,6 +81,13 @@ export const DescricaoProduto = styled.p<ElementosCard>`
   font-weight: 400;
   line-height: 22px;
   background-color: transparent;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    font-size: ${({ isModal }) => (isModal ? '12px' : '13px')};
+    line-height: ${({ isModal }) => isModal && '16px'};
+    margin-top: ${({ isModal }) => isModal && '5px'};
+    text-align: ${({ isModal }) => isModal && 'justify'};
+  }
 `
 
 export const BotaoAdicionarCarrinho = styled.button<ElementosCard>`
@@ -103,4 +142,9 @@ export const IconClose = styled.img`
   width: 16px;
   background-color: transparent;
   cursor: pointer;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    top: 16px;
+    right: 16px;
+  }
 `

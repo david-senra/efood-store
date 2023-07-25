@@ -1,15 +1,26 @@
+import { useDispatch } from 'react-redux'
+import { add, open } from '../../store/reducers/cart'
 import { useState } from 'react'
 import * as S from './styles'
 import { Produto } from '../../models/Produto'
 import closeImg from '../../assets/images/close-icon.png'
 
-export const CardProduto = ({
-  nome,
-  foto,
-  descricao,
-  porcao,
-  preco
-}: Produto) => {
+export const formataPreco = (preco = 0) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(preco)
+}
+
+export const CardProduto = (produto: Produto) => {
+  const dispatch = useDispatch()
+
+  const addToCart = () => {
+    dispatch(add(produto))
+    dispatch(open())
+    setEVisivel(false)
+  }
+
   const [eVisivel, setEVisivel] = useState(false)
 
   const abreviaDescricao = (descricao: string) => {
@@ -19,19 +30,14 @@ export const CardProduto = ({
     return descricao
   }
 
-  const formataPreco = (preco = 0) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(preco)
-  }
-
   return (
     <>
       <S.CardProduto>
-        <S.ImagemProduto src={foto} />
-        <S.TituloProduto>{nome}</S.TituloProduto>
-        <S.DescricaoProduto>{abreviaDescricao(descricao)}</S.DescricaoProduto>
+        <S.ImagemProduto src={produto.foto} />
+        <S.TituloProduto>{produto.nome}</S.TituloProduto>
+        <S.DescricaoProduto>
+          {abreviaDescricao(produto.descricao)}
+        </S.DescricaoProduto>
         <S.BotaoAdicionarCarrinho onClick={() => setEVisivel(true)}>
           Adicionar ao carrinho
         </S.BotaoAdicionarCarrinho>
@@ -39,15 +45,20 @@ export const CardProduto = ({
       <S.Modal className={eVisivel ? 'visivel' : ''}>
         <S.ModalContent>
           <S.CardProduto isModal>
-            <S.ImagemProduto isModal src={foto} />
+            <S.ImagemProduto isModal src={produto.foto} />
             <div>
-              <S.TituloProduto isModal>{nome}</S.TituloProduto>
-              <S.DescricaoProduto isModal>{descricao}</S.DescricaoProduto>
+              <S.TituloProduto isModal>{produto.nome}</S.TituloProduto>
               <S.DescricaoProduto isModal>
-                Serve: {porcao === '1 pessoa' ? porcao : 'de ' + porcao}
+                {produto.descricao}
               </S.DescricaoProduto>
-              <S.BotaoAdicionarCarrinho isModal>
-                Adicionar ao carrinho - {formataPreco(preco)}
+              <S.DescricaoProduto isModal>
+                Serve:{' '}
+                {produto.porcao === '1 pessoa'
+                  ? produto.porcao
+                  : 'de ' + produto.porcao}
+              </S.DescricaoProduto>
+              <S.BotaoAdicionarCarrinho isModal onClick={addToCart}>
+                Adicionar ao carrinho - {formataPreco(produto.preco)}
               </S.BotaoAdicionarCarrinho>
             </div>
             <S.IconClose

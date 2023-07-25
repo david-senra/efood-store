@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { cores, breakpoints } from '../../styles'
 
 export const FooterStyle = styled.footer`
   width: 100%;
@@ -11,6 +11,10 @@ export const FooterStyle = styled.footer`
   flex-direction: column;
   align-items: center;
   padding-top: 40px;
+
+  @media (max-width: ${breakpoints.desktop}) {
+    margin-top: 80px;
+  }
 `
 
 export const ListaRedesSociais = styled.ul`
@@ -45,4 +49,9 @@ export const TextoFooter = styled.p`
   color: ${cores.rosaEscuro};
   width: 480px;
   background-color: transparent;
+
+  @media (max-width: ${breakpoints.desktop}) {
+    width: 300px;
+    margin-top: 40px;
+  }
 `

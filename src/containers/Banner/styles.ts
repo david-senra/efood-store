@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import { breakpoints } from '../../styles'
 
 export const DivBanner = styled.div`
   width: 100%;
@@ -25,6 +26,10 @@ export const TituloBanner = styled(TextoBanner)`
   font-weight: 900;
   padding-top: 215px;
   background-color: transparent;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    font-size: 24px;
+  }
 `
 
 export const DivEfeito = styled.div`

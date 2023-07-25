@@ -1,23 +1,20 @@
+import { Provider } from 'react-redux'
 import { BrowserRouter } from 'react-router-dom'
 import Rotas from './routes'
 import EstiloGlobal from './styles'
 import Footer from './containers/Footer'
+import { store } from './store'
 
 function App() {
   return (
-    <BrowserRouter>
-      <EstiloGlobal />
-      <Rotas />
-      <Footer />
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter>
+        <EstiloGlobal />
+        <Rotas />
+        <Footer />
+      </BrowserRouter>
+    </Provider>
   )
-}
-
-export type ProdutoType = {
-  id: number
-  nome: string
-  preco: number
-  imagem: string
 }
 
 export default App

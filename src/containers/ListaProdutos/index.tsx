@@ -1,25 +1,20 @@
-import { useState, useEffect } from 'react'
 import { Produto } from '../../models/Produto'
 import * as S from './styles'
 import { CardProduto } from '../../components/CardProduto'
 
 type ListaTipo = {
-  id: number
+  listaProdutos: Produto[]
 }
 
-const ListaProdutos = ({ id }: ListaTipo) => {
-  const [listaPratos, setListaPratos] = useState<Produto[]>()
-
-  useEffect(() => {
-    fetch(`https://fake-api-tau.vercel.app/api/efood/restaurantes/${id}`)
-      .then((res) => res.json())
-      .then((res) => setListaPratos(res.cardapio))
-  }, [id])
+const ListaProdutos = ({ listaProdutos }: ListaTipo) => {
+  if (!listaProdutos) {
+    return <h3>Carregando...</h3>
+  }
 
   return (
     <S.ListaProdutosStyle>
-      {listaPratos !== undefined &&
-        listaPratos.map(({ id, nome, descricao, foto, porcao, preco }) => (
+      {listaProdutos !== undefined &&
+        listaProdutos.map(({ id, nome, descricao, foto, porcao, preco }) => (
           <CardProduto
             key={id}
             id={id}

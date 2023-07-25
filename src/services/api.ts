@@ -1,24 +1,20 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-
-import { ProdutoType } from '../App'
+import { Restaurante } from '../models/Restaurante'
 
 const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://fake-api-tau.vercel.app/api/'
+    baseUrl: 'https://fake-api-tau.vercel.app/api/efood/'
   }),
   endpoints: (builder) => ({
-    getProdutos: builder.query<ProdutoType[], void>({
-      query: () => 'produtos'
+    getRestaurantes: builder.query<Restaurante[], void>({
+      query: () => 'restaurantes'
+    }),
+    getPageRestaurante: builder.query<Restaurante, string>({
+      query: (id) => `restaurantes/${id}`
     })
   })
 })
 
-export const { useGetProdutosQuery } = api
+export const { useGetRestaurantesQuery, useGetPageRestauranteQuery } = api
 
 export default api
-
-// Para acessar a API:
-// const { data: produtos, isLoading, error }
-// if (isLoading) return <h2>Carregando</h2>
-// if (error) return <h2>A requisição não pôde ser realizada</h2>
-// state.itens.push(item) OU state.itens = [...itens, jogo] criando um novo estado

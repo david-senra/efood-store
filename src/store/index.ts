@@ -1,12 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
-
-import carrinhoReducer from './reducers/carrinho'
-
 import api from '../services/api'
+import cartReducer from './reducers/cart'
 
 export const store = configureStore({
   reducer: {
-    carrinho: carrinhoReducer,
+    cart: cartReducer,
     [api.reducerPath]: api.reducer
   },
   middleware: (getDefaultMiddleware) =>
@@ -14,10 +12,3 @@ export const store = configureStore({
 })
 
 export type RootReducer = ReturnType<typeof store.getState>
-
-// Para acessar os itens: (importar o RootReducer e o useSelector)
-// const itens = useSelector(state: RootReducer => state.carrinho.itens)
-
-// Para chamar uma action: (importar o UseDispatch)
-// const dispatch = useDispatch()     -- DENTRO DA FUNÇÃO
-// dispatch(adicionar(produto))

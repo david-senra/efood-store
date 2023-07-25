@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { cores, breakpoints } from '../../styles'
 
 export const Hero = styled.header`
   width: 100%;
@@ -18,4 +18,10 @@ export const TituloHero = styled.h2`
   font-weight: 900;
   line-height: 42px;
   background-color: transparent;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    max-width: 80%;
+    margin-top: 68.5px;
+    font-size: 28px;
+  }
 `

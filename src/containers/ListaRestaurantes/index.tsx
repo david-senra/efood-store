@@ -1,17 +1,13 @@
-import { useState, useEffect } from 'react'
 import * as S from './styles'
 import { CardRestaurante } from '../../components/CardRestaurante'
 import { Restaurante } from '../../models/Restaurante'
 
-const ListaRestaurantes = () => {
-  const [listaRestaurantes, setListaRestaurantes] = useState<Restaurante[]>([])
+export type PropsRestaurantList = {
+  restaurantes: Restaurante[]
+  id?: string
+}
 
-  useEffect(() => {
-    fetch('https://fake-api-tau.vercel.app/api/efood/restaurantes')
-      .then((res) => res.json())
-      .then((res) => setListaRestaurantes(res))
-  }, [])
-
+const ListaRestaurantes = ({ restaurantes }: PropsRestaurantList) => {
   const getDescricao = (descricao: string) => {
     if (descricao.length > 250) {
       return descricao.slice(0, 247) + '...'
@@ -21,7 +17,7 @@ const ListaRestaurantes = () => {
 
   return (
     <S.ListaRestaurantesStyles>
-      {listaRestaurantes.map((restaurante) => (
+      {restaurantes.map((restaurante) => (
         <CardRestaurante
           key={restaurante.id}
           id={restaurante.id}
