@@ -1,14 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Produto } from '../../models/Produto'
 
-type CartState = {
+export type CartState = {
   itens: Produto[]
   isOpen: boolean
+  cartPage: 'cart' | 'entrega' | 'pagamento' | 'realizado'
 }
 
 const initialState: CartState = {
   itens: [],
-  isOpen: false
+  isOpen: false,
+  cartPage: 'cart'
 }
 
 const cartSlice = createSlice({
@@ -20,6 +22,9 @@ const cartSlice = createSlice({
     },
     close: (state) => {
       state.isOpen = false
+    },
+    changePage: (state, action: PayloadAction<CartState['cartPage']>) => {
+      state.cartPage = action.payload
     },
     add: (state, action: PayloadAction<Produto>) => {
       const ProdutoProcurado = state.itens.find(
@@ -35,5 +40,5 @@ const cartSlice = createSlice({
   }
 })
 
-export const { add, remove, open, close } = cartSlice.actions
+export const { add, remove, open, close, changePage } = cartSlice.actions
 export default cartSlice.reducer
