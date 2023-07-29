@@ -30,9 +30,12 @@ const cartSlice = createSlice({
       const ProdutoProcurado = state.itens.find(
         (item) => item.id === action.payload.id
       )
-      ProdutoProcurado
-        ? alert('Produto já adicionado')
-        : state.itens.push(action.payload)
+      if (ProdutoProcurado) {
+        alert('Produto já adicionado')
+      } else {
+        state.itens.push(action.payload)
+        state.isOpen = true
+      }
     },
     remove: (state, action: PayloadAction<number>) => {
       state.itens = state.itens.filter((item) => item.id !== action.payload)

@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { RootReducer } from '../../store'
-import { remove, changePage } from '../../store/reducers/cart'
+import { remove, changePage, close } from '../../store/reducers/cart'
 import { formataPreco } from '../../components/CardProduto'
 import { CartState } from '../../store/reducers/cart'
 import * as S from './styles'
@@ -24,10 +25,15 @@ const CartItems = () => {
   }
 
   return (
-    <>
-      <S.ListaItems>
+    <LayoutGroup>
+      <S.ListaItems as={AnimatePresence}>
         {itens.map(({ id, nome, preco, foto }) => (
-          <S.CartItem key={id}>
+          <S.CartItem
+            key={id}
+            as={motion.div}
+            layout
+            transition={{ duration: 0.5 }}
+          >
             <img src={foto} />
             <div>
               <h3>{nome}</h3>
@@ -37,18 +43,33 @@ const CartItems = () => {
           </S.CartItem>
         ))}
       </S.ListaItems>
-      <S.DivPrices>
-        <S.Prices>Valor total</S.Prices>
-        <S.Prices>{formataPreco(getTotalPrice())}</S.Prices>
+      <S.DivPrices layout transition={{ duration: 0.5 }}>
+        <S.Prices>
+          {itens.length > 0
+            ? 'Valor total'
+            : 'Você não possui itens no carrinho'}
+        </S.Prices>
+        {itens.length > 0 && (
+          <S.Prices>{formataPreco(getTotalPrice())}</S.Prices>
+        )}
       </S.DivPrices>
       <S.ButtonContainer
-        title="Clique aqui para continuar com a entrega"
-        onClick={() => mudarPagina('entrega')}
+        as={motion.div}
+        layout
+        transition={{ duration: 0.5 }}
+        title={
+          itens.length > 0
+            ? 'Clique aqui para continuar com a entrega'
+            : 'Clique aqui para fechar'
+        }
+        onClick={() => {
+          itens.length > 0 ? mudarPagina('entrega') : dispatch(close())
+        }}
         type="button"
       >
-        Continuar com a entrega
+        {itens.length > 0 ? 'Continuar com a entrega' : 'Fechar'}
       </S.ButtonContainer>
-    </>
+    </LayoutGroup>
   )
 }
 

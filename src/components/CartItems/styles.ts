@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import styled from 'styled-components'
 import { cores, breakpoints } from '../../styles'
 import fechar from '../../assets/images/lixeira.svg'
@@ -71,7 +72,7 @@ export const CartItem = styled.li`
   }
 `
 
-export const DivPrices = styled.div`
+export const DivPrices = styled(motion.div)`
   margin-top: 40px;
   display: flex;
   justify-content: space-between;
@@ -103,4 +104,7 @@ export const ButtonContainer = styled.button`
   cursor: pointer;
   max-width: 100%;
   width: 100%;
+  text-align: center;
+  flex-shrink: 0;
+  padding: 4px 0;
 `

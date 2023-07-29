@@ -34,6 +34,10 @@ export const Aside = styled.aside`
   padding: 32px 8px 0 8px;
   max-width: 360px;
   width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: -500px;
 
   @media (max-width: ${breakpoints.tablet}) {
     width: 70%;

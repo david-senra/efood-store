@@ -1,6 +1,12 @@
 import { useSelector, useDispatch } from 'react-redux'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useFormik } from 'formik'
+import * as Yup from 'yup'
+import { usePurchaseMutation } from '../../services/api'
 import { CartState } from '../../store/reducers/cart'
 import { changePage } from '../../store/reducers/cart'
+import { addOrder } from '../../store/reducers/orders'
 import { RootReducer } from '../../store'
 import { formataPreco } from '../CardProduto'
 import * as S from './styles'
@@ -11,7 +17,15 @@ export type typeCartDados = {
 
 const CartDados = ({ tipo }: typeCartDados) => {
   const { itens } = useSelector((state: RootReducer) => state.cart)
+  const [tentativaPaginaEntrega, setTentativaPaginaEntrega] = useState(false)
+  const [tipoPagina, setTipoPagina] = useState(tipo)
+  const [purchase, { data, isSuccess, isLoading }] = usePurchaseMutation()
   const dispatch = useDispatch()
+
+  const ProdutosCheckOut: TipoProdutoCheckout[] = itens.map((item) => ({
+    id: item.id,
+    price: item.preco as number
+  }))
 
   const mudarPagina = (pagina: CartState['cartPage']) => {
     dispatch(changePage(pagina))
@@ -23,114 +37,450 @@ const CartDados = ({ tipo }: typeCartDados) => {
     }, 0)
   }
 
-  if (tipo === 'entrega') {
-    return (
-      <S.DivDados>
-        <S.TituloDados>Entrega</S.TituloDados>
-        <S.FormularioDados>
-          <S.FormularioItem>
-            <label htmlFor="nomeEntrega">Quem irá receber</label>
-            <S.InputFormularioTexto name="nomeEntrega" type="text" />
-          </S.FormularioItem>
-          <S.FormularioItem>
-            <label htmlFor="endereco">Endereço</label>
-            <S.InputFormularioTexto name="endereco" type="text" />
-          </S.FormularioItem>
-          <S.FormularioItem>
-            <label htmlFor="cidade">Cidade</label>
-            <S.InputFormularioTexto name="cidade" type="text" />
-          </S.FormularioItem>
-          <S.DivMesmaLinha>
-            <S.FormularioItem>
-              <label htmlFor="cep">CEP</label>
-              <S.InputFormularioTexto name="cep" type="number" />
-            </S.FormularioItem>
-            <S.FormularioItem>
-              <label htmlFor="numero">Número</label>
-              <S.InputFormularioTexto name="numero" type="number" />
-            </S.FormularioItem>
-          </S.DivMesmaLinha>
-          <S.FormularioItem>
-            <label htmlFor="complemento">Complemento (opcional)</label>
-            <S.InputFormularioTexto name="complemento" type="text" />
-          </S.FormularioItem>
-        </S.FormularioDados>
-        <S.DivBotoes>
-          <S.ButtonContainer onClick={() => mudarPagina('pagamento')}>
-            Continuar com o pagamento
-          </S.ButtonContainer>
-          <S.ButtonContainer onClick={() => mudarPagina('cart')}>
-            Voltar para o carrinho
-          </S.ButtonContainer>
-        </S.DivBotoes>
-      </S.DivDados>
-    )
-  } else if (tipo === 'pagamento') {
-    return (
-      <S.DivDados>
-        <S.TituloDados>
-          Pagamento - Valor a Pagar {formataPreco(getTotalPrice())}
-        </S.TituloDados>
-        <S.FormularioDados>
-          <S.FormularioItem>
-            <label htmlFor="nomePagamento">Nome no Cartão</label>
-            <S.InputFormularioTexto name="nomePagamento" type="text" />
-          </S.FormularioItem>
-          <S.DivMesmaLinhaCVV>
-            <S.FormularioItem>
-              <label htmlFor="numeroCartao">Número do Cartão</label>
-              <S.InputFormularioCartao name="numeroCartao" type="number" />
-            </S.FormularioItem>
-            <S.FormularioItem>
-              <label htmlFor="numeroCvv">CVV</label>
-              <S.InputFormularioTexto name="numeroCvv" type="number" />
-            </S.FormularioItem>
-          </S.DivMesmaLinhaCVV>
-          <S.DivMesmaLinha>
-            <S.FormularioItem>
-              <label htmlFor="mesVencimento">Mês de Vencimento</label>
-              <S.InputFormularioData name="mesVencimento" type="date" />
-            </S.FormularioItem>
-            <S.FormularioItem>
-              <label htmlFor="anoVencimento">Ano de Vencimento</label>
-              <S.InputFormularioData name="anoVencimento" type="date" />
-            </S.FormularioItem>
-          </S.DivMesmaLinha>
-        </S.FormularioDados>
-        <S.DivBotoes>
-          <S.ButtonContainer onClick={() => mudarPagina('realizado')}>
-            Finalizar Pagamento
-          </S.ButtonContainer>
-          <S.ButtonContainer onClick={() => mudarPagina('entrega')}>
-            Voltar para a edição de endereço
-          </S.ButtonContainer>
-        </S.DivBotoes>
-      </S.DivDados>
-    )
-  } else {
-    return (
-      <S.DivDados>
-        <S.TituloDados>Pedido realizado - NÚMERO</S.TituloDados>
-        <S.TextoFormulario>
-          Estamos felizes em informar que seu pedido já está em processo de
-          preparação e, em breve, será entregue no endereço fornecido.
-          <br />
-          <br />
-          Gostaríamos de ressaltar que nossos entregadores não estão autorizados
-          a realizar cobranças extras.
-          <br />
-          <br />
-          Lembre-se da importância de higienizar as mãos após o recebimento do
-          pedido, garantindo assim sua segurança e bem-estar durante a refeição.
-          <br />
-          <br />
-          Esperamos que desfrute de uma deliciosa e agradável experiência
-          gastronômica. Bom apetite!
-        </S.TextoFormulario>
-        <S.ButtonContainer>Concluir</S.ButtonContainer>
-      </S.DivDados>
-    )
+  const form = useFormik({
+    initialValues: {
+      nomeEntrega: '',
+      enderecoEntrega: '',
+      cidadeEntrega: '',
+      cepEntrega: '',
+      numeroEntrega: '',
+      complementoEntrega: '',
+      nomeCartao: '',
+      numeroCartao: '',
+      numeroCvv: '',
+      mesVencimento: '',
+      anoVencimento: ''
+    },
+    validationSchema: Yup.object({
+      nomeEntrega: Yup.string()
+        .min(5, 'O nome deve ter pelo menos 5 caracteres')
+        .required('Campo obrigatório'),
+      enderecoEntrega: Yup.string().required('Campo obrigatório'),
+      cidadeEntrega: Yup.string().required('Campo obrigatório'),
+      numeroEntrega: Yup.number().required('Campo obrigatório'),
+      cepEntrega: Yup.string()
+        .min(10, 'Por favor, insira um CEP válido')
+        .required('Campo obrigatório'),
+      nomeCartao: Yup.string().required('Campo obrigatório'),
+      numeroCvv: Yup.string().min(3, 'Nº Inválido').required('Nº Inválido'),
+      numeroCartao: Yup.string()
+        .min(19, 'Cartão inválido')
+        .required('Campo obrigatório'),
+      mesVencimento: Yup.number()
+        .max(12, 'Insira um mês válido')
+        .required('Campo obrigatório')
+        .min(1, 'Insira um mês válido'),
+      anoVencimento: Yup.number()
+        .required('Campo obrigatório')
+        .min(2024, 'Insira um ano válido')
+        .max(2050, 'Insira um ano válido')
+    }),
+    onSubmit: (values) => {
+      purchase({
+        delivery: {
+          receiver: values.nomeEntrega,
+          address: {
+            description: values.enderecoEntrega,
+            city: values.cidadeEntrega,
+            zipCode: values.cepEntrega,
+            number: values.numeroEntrega,
+            complement: values.complementoEntrega
+          }
+        },
+        payment: {
+          card: {
+            name: values.nomeCartao,
+            number: values.numeroCartao,
+            code: values.numeroCvv,
+            expires: {
+              month: values.mesVencimento,
+              year: values.anoVencimento
+            }
+          }
+        },
+        products: ProdutosCheckOut.map((item) => ({
+          id: item.id,
+          price: item.price
+        }))
+      })
+        .unwrap()
+        .then(() => dispatch(addOrder(ProdutosCheckOut)))
+    }
+  })
+
+  const getErrorMessage = (fieldName: string, message?: string) => {
+    const isInvalid: boolean = fieldName in form.errors
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const hasError = isInvalid && isAttempted
+    return hasError ? message : ''
   }
+
+  const getErrorMessagePagamento = (fieldName: string, message?: string) => {
+    const isInvalid: boolean = fieldName in form.errors
+    const isAttempted: boolean = form.submitCount > 0
+    const hasError = isInvalid && isAttempted
+    return hasError ? message : ''
+  }
+
+  const checkInputhasError = (fieldName: string) => {
+    const isInvalid: boolean = fieldName in form.errors
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const hasError = isInvalid && isAttempted
+    return hasError
+  }
+
+  const checkInputhasErrorPagamento = (fieldName: string) => {
+    const isInvalid: boolean = fieldName in form.errors
+    const isAttempted: boolean = form.submitCount > 0
+    const hasError = isInvalid && isAttempted
+    return hasError
+  }
+
+  const checkDeliveryError = () => {
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const formInvalid =
+      'nomeEntrega' in form.errors ||
+      'enderecoEntrega' in form.errors ||
+      'cidadeEntrega' in form.errors ||
+      'numeroEntrega' in form.errors ||
+      'cepEntrega' in form.errors
+    return isAttempted && formInvalid
+  }
+
+  const VerificarPaginaEntrega = () => {
+    setTentativaPaginaEntrega(true)
+    const input = document.getElementById('myTextInput')
+    input && input.focus()
+    const formInvalid =
+      'nomeEntrega' in form.errors ||
+      'enderecoEntrega' in form.errors ||
+      'cidadeEntrega' in form.errors ||
+      'numeroEntrega' in form.errors ||
+      'cepEntrega' in form.errors
+    console.log(form.touched)
+    !formInvalid && setTipoPagina('pagamento')
+    console.log(tipoPagina)
+  }
+
+  const checkGeneralError = () => {
+    const isAttempted: boolean = form.submitCount > 0
+    const formInvalid = !form.isValid
+    return isAttempted && formInvalid
+  }
+
+  return (
+    <>
+      {data && isSuccess ? (
+        <S.DivDadosEnd>
+          <S.TituloDados>
+            Pedido realizado - NÚMERO {data.orderId}
+          </S.TituloDados>
+          <S.TextoFormulario>
+            Estamos felizes em informar que seu pedido já está em processo de
+            preparação e, em breve, será entregue no endereço fornecido.
+            <br />
+            <br />
+            Gostaríamos de ressaltar que nossos entregadores não estão
+            autorizados a realizar cobranças extras.
+            <br />
+            <br />
+            Lembre-se da importância de higienizar as mãos após o recebimento do
+            pedido, garantindo assim sua segurança e bem-estar durante a
+            refeição.
+            <br />
+            <br />
+            Esperamos que desfrute de uma deliciosa e agradável experiência
+            gastronômica. Bom apetite!
+          </S.TextoFormulario>
+          <Link to={'/'} type="button">
+            <S.ButtonContainer>Concluir</S.ButtonContainer>
+          </Link>
+        </S.DivDadosEnd>
+      ) : (
+        <S.SuperForm onSubmit={form.handleSubmit}>
+          <S.DivDados className={tipoPagina === 'entrega' ? 'visible' : ''}>
+            <S.TituloDados>Entrega</S.TituloDados>
+            <S.FormularioDados>
+              <S.FormularioItem>
+                <label htmlFor="nomeEntrega">Quem irá receber</label>
+                <S.InputFormularioTexto
+                  id="nomeEntrega"
+                  name="nomeEntrega"
+                  type="text"
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  autoFocus
+                  onFocus={(e: { currentTarget: { select: () => void } }) =>
+                    e.currentTarget.select()
+                  }
+                  className={checkInputhasError('nomeEntrega') ? 'error' : ''}
+                />
+                {'nomeEntrega' in form.errors && tentativaPaginaEntrega && (
+                  <S.ErroMensagem>
+                    {getErrorMessage('nomeEntrega', form.errors.nomeEntrega)}
+                  </S.ErroMensagem>
+                )}
+              </S.FormularioItem>
+              <S.FormularioItem>
+                <label htmlFor="enderecoEntrega">Endereço</label>
+                <S.InputFormularioTexto
+                  id="enderecoEntrega"
+                  name="enderecoEntrega"
+                  type="text"
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  className={
+                    checkInputhasError('enderecoEntrega') ? 'error' : ''
+                  }
+                />
+                {'enderecoEntrega' in form.errors && tentativaPaginaEntrega && (
+                  <S.ErroMensagem>
+                    {getErrorMessage(
+                      'enderecoEntrega',
+                      form.errors.enderecoEntrega
+                    )}
+                  </S.ErroMensagem>
+                )}
+              </S.FormularioItem>
+              <S.FormularioItem>
+                <label htmlFor="cidadeEntrega">Cidade</label>
+                <S.InputFormularioTexto
+                  id="cidadeEntrega"
+                  name="cidadeEntrega"
+                  type="text"
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  className={checkInputhasError('cidadeEntrega') ? 'error' : ''}
+                />
+                {'cidadeEntrega' in form.errors && tentativaPaginaEntrega && (
+                  <S.ErroMensagem>
+                    {getErrorMessage(
+                      'cidadeEntrega',
+                      form.errors.cidadeEntrega
+                    )}
+                  </S.ErroMensagem>
+                )}
+              </S.FormularioItem>
+              <S.DivMesmaLinha>
+                <S.FormularioItem>
+                  <label htmlFor="cepEntrega">CEP</label>
+                  <S.InputFormularioMask
+                    id="cepEntrega"
+                    name="cepEntrega"
+                    mask="99.999-999"
+                    maskChar={''}
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={checkInputhasError('cepEntrega') ? 'error' : ''}
+                  />
+                  {'cepEntrega' in form.errors && tentativaPaginaEntrega && (
+                    <S.ErroMensagem>
+                      {getErrorMessage('cepEntrega', form.errors.cepEntrega)}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+                <S.FormularioItem>
+                  <label htmlFor="numeroEntrega">Número</label>
+                  <S.InputFormularioTexto
+                    id="numeroEntrega"
+                    name="numeroEntrega"
+                    type="number"
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={
+                      checkInputhasError('numeroEntrega') ? 'error' : ''
+                    }
+                  />
+                  {'numeroEntrega' in form.errors && tentativaPaginaEntrega && (
+                    <S.ErroMensagem>
+                      {getErrorMessage(
+                        'numeroEntrega',
+                        form.errors.numeroEntrega
+                      )}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+              </S.DivMesmaLinha>
+              <S.FormularioItem>
+                <label htmlFor="complementoEntrega">
+                  Complemento (opcional)
+                </label>
+                <S.InputFormularioTexto
+                  id="complementoEntrega"
+                  name="complementoEntrega"
+                  type="text"
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                />
+              </S.FormularioItem>
+            </S.FormularioDados>
+            <S.DivBotoes>
+              <S.ButtonContainer
+                type="button"
+                onClick={() => VerificarPaginaEntrega()}
+              >
+                Continuar com o pagamento
+              </S.ButtonContainer>
+              {checkDeliveryError() && (
+                <S.ErroMensagemGeral>
+                  Por favor, corrija os erros no formulário
+                </S.ErroMensagemGeral>
+              )}
+              <S.ButtonContainer onClick={() => mudarPagina('cart')}>
+                Voltar para o carrinho
+              </S.ButtonContainer>
+            </S.DivBotoes>
+          </S.DivDados>
+          <S.DivDados className={tipoPagina === 'pagamento' ? 'visible' : ''}>
+            <S.TituloDados>
+              Pagamento - Valor a Pagar {formataPreco(getTotalPrice())}
+            </S.TituloDados>
+            <S.FormularioDados>
+              <S.FormularioItem>
+                <label htmlFor="nomeCartao">Nome no Cartão</label>
+                <S.InputFormularioTexto
+                  id="nomeCartao"
+                  name="nomeCartao"
+                  type="text"
+                  onChange={form.handleChange}
+                  onBlur={form.handleBlur}
+                  className={
+                    checkInputhasErrorPagamento('nomeCartao') ? 'error' : ''
+                  }
+                />
+                {'nomeCartao' in form.errors && form.submitCount > 0 && (
+                  <S.ErroMensagem>
+                    {getErrorMessagePagamento(
+                      'nomeCartao',
+                      form.errors.nomeCartao
+                    )}
+                  </S.ErroMensagem>
+                )}
+              </S.FormularioItem>
+              <S.DivMesmaLinhaCVV>
+                <S.FormularioItem>
+                  <label htmlFor="numeroCartao">Número do Cartão</label>
+                  <S.InputFormularioMaskCartao
+                    id="numeroCartao"
+                    name="numeroCartao"
+                    maskChar={''}
+                    mask="9999 9999 9999 9999"
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={
+                      checkInputhasErrorPagamento('numeroCartao') ? 'error' : ''
+                    }
+                  />
+                  {'numeroCartao' in form.errors && form.submitCount > 0 && (
+                    <S.ErroMensagem>
+                      {getErrorMessagePagamento(
+                        'numeroCartao',
+                        form.errors.numeroCartao
+                      )}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+                <S.FormularioItem>
+                  <label htmlFor="numeroCvv">CVV</label>
+                  <S.InputFormularioMask
+                    id="numeroCvv"
+                    name="numeroCvv"
+                    maskChar={''}
+                    mask="999"
+                    type="string"
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={
+                      checkInputhasErrorPagamento('numeroCvv') ? 'error' : ''
+                    }
+                  />
+                  {'numeroCvv' in form.errors && form.submitCount > 0 && (
+                    <S.ErroMensagem>
+                      {getErrorMessagePagamento(
+                        'numeroCvv',
+                        form.errors.numeroCvv
+                      )}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+              </S.DivMesmaLinhaCVV>
+              <S.DivMesmaLinha>
+                <S.FormularioItem>
+                  <label htmlFor="mesVencimento">Mês de Vencimento</label>
+                  <S.InputFormularioMaskData
+                    id="mesVencimento"
+                    name="mesVencimento"
+                    maskChar={''}
+                    mask="99"
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={
+                      checkInputhasErrorPagamento('mesVencimento')
+                        ? 'error'
+                        : ''
+                    }
+                  />
+                  {'mesVencimento' in form.errors && form.submitCount > 0 && (
+                    <S.ErroMensagem>
+                      {getErrorMessagePagamento(
+                        'mesVencimento',
+                        form.errors.mesVencimento
+                      )}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+                <S.FormularioItem>
+                  <label htmlFor="anoVencimento">Ano de Vencimento</label>
+                  <S.InputFormularioMaskData
+                    id="anoVencimento"
+                    name="anoVencimento"
+                    maskChar={''}
+                    mask="9999"
+                    onChange={form.handleChange}
+                    onBlur={form.handleBlur}
+                    className={
+                      checkInputhasErrorPagamento('anoVencimento')
+                        ? 'error'
+                        : ''
+                    }
+                  />
+                  {'anoVencimento' in form.errors && form.submitCount > 0 && (
+                    <S.ErroMensagem>
+                      {getErrorMessagePagamento(
+                        'anoVencimento',
+                        form.errors.anoVencimento
+                      )}
+                    </S.ErroMensagem>
+                  )}
+                </S.FormularioItem>
+              </S.DivMesmaLinha>
+            </S.FormularioDados>
+            <S.DivBotoes>
+              <S.ButtonContainer type={'submit'}>
+                Finalizar Pagamento
+              </S.ButtonContainer>
+              {checkGeneralError() && (
+                <S.ErroMensagemGeral className={isLoading ? 'is-loading' : ''}>
+                  Por favor, corrija os erros presentes no formulário
+                </S.ErroMensagemGeral>
+              )}
+              {isLoading && (
+                <S.ErroMensagemGeral className={'is-loading'}>
+                  Finalizando compra...
+                </S.ErroMensagemGeral>
+              )}
+              <S.ButtonContainer
+                type="button"
+                onClick={() => setTipoPagina('entrega')}
+              >
+                Voltar para a edição de endereço
+              </S.ButtonContainer>
+            </S.DivBotoes>
+          </S.DivDados>
+        </S.SuperForm>
+      )}
+    </>
+  )
 }
 
 export default CartDados
