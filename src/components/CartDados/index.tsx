@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from 'react-redux'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -15,10 +15,17 @@ export type typeCartDados = {
   tipo: 'entrega' | 'pagamento' | 'realizado'
 }
 
+type CepDados = {
+  localidade: string
+  logradouro: string
+}
+
 const CartDados = ({ tipo }: typeCartDados) => {
   const { itens } = useSelector((state: RootReducer) => state.cart)
   const [tentativaPaginaEntrega, setTentativaPaginaEntrega] = useState(false)
   const [tipoPagina, setTipoPagina] = useState(tipo)
+  const [cepValido, setCepValido] = useState(true)
+  const [dataCep, setDataCep] = useState<CepDados>()
   const [purchase, { data, isSuccess, isLoading }] = usePurchaseMutation()
   const dispatch = useDispatch()
 
@@ -59,7 +66,8 @@ const CartDados = ({ tipo }: typeCartDados) => {
       cidadeEntrega: Yup.string().required('Campo obrigatório'),
       numeroEntrega: Yup.number().required('Campo obrigatório'),
       cepEntrega: Yup.string()
-        .min(10, 'Por favor, insira um CEP válido')
+        .min(9, 'Este CEP não é válido')
+        .test('validação', 'CEP inválido', () => cepValido)
         .required('Campo obrigatório'),
       nomeCartao: Yup.string().required('Campo obrigatório'),
       numeroCvv: Yup.string().min(3, 'Nº Inválido').required('Nº Inválido'),
@@ -107,6 +115,31 @@ const CartDados = ({ tipo }: typeCartDados) => {
         .then(() => dispatch(addOrder(ProdutosCheckOut)))
     }
   })
+
+  useEffect(() => {
+    const inputElemento = document.querySelector(
+      '#nomeEntrega'
+    ) as HTMLInputElement
+    inputElemento && inputElemento.select()
+  }, [])
+
+  useEffect(() => {
+    const fetchCep = async () => {
+      const respostaCep = await fetch(
+        `https://viacep.com.br/ws/${form.values.cepEntrega}/json`
+      )
+      const dadosCep = await respostaCep.json()
+      if (dadosCep.erro == true) {
+        setCepValido(false)
+      } else {
+        setCepValido(true)
+        setDataCep(dadosCep)
+      }
+    }
+    if (form.values.cepEntrega.length == 9) {
+      fetchCep()
+    }
+  }, [form.values.cepEntrega])
 
   const getErrorMessage = (fieldName: string, message?: string) => {
     const isInvalid: boolean = fieldName in form.errors
@@ -209,10 +242,6 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   type="text"
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
-                  autoFocus
-                  onFocus={(e: { currentTarget: { select: () => void } }) =>
-                    e.currentTarget.select()
-                  }
                   className={checkInputhasError('nomeEntrega') ? 'error' : ''}
                 />
                 {'nomeEntrega' in form.errors && tentativaPaginaEntrega && (
@@ -229,6 +258,20 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   type="text"
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  onClick={() => {
+                    cepValido &&
+                      dataCep &&
+                      (form.values.enderecoEntrega = dataCep.logradouro)
+                    setDataCep({
+                      localidade: '',
+                      logradouro: ''
+                    })
+                  }}
+                  value={
+                    cepValido && dataCep && dataCep.localidade != ''
+                      ? dataCep.logradouro
+                      : form.values.enderecoEntrega
+                  }
                   className={
                     checkInputhasError('enderecoEntrega') ? 'error' : ''
                   }
@@ -250,6 +293,20 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   type="text"
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
+                  onClick={() => {
+                    cepValido &&
+                      dataCep &&
+                      (form.values.cidadeEntrega = dataCep.localidade)
+                    setDataCep({
+                      localidade: '',
+                      logradouro: ''
+                    })
+                  }}
+                  value={
+                    cepValido && dataCep && dataCep.localidade != ''
+                      ? dataCep.localidade
+                      : form.values.cidadeEntrega
+                  }
                   className={checkInputhasError('cidadeEntrega') ? 'error' : ''}
                 />
                 {'cidadeEntrega' in form.errors && tentativaPaginaEntrega && (
@@ -267,7 +324,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   <S.InputFormularioMask
                     id="cepEntrega"
                     name="cepEntrega"
-                    mask="99.999-999"
+                    mask="99999-999"
                     maskChar={''}
                     onChange={form.handleChange}
                     onBlur={form.handleBlur}
