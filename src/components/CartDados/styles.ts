@@ -55,6 +55,10 @@ export const DivMesmaLinha = styled.div`
 export const DivMesmaLinhaCVV = styled(DivMesmaLinha)`
   justify-content: space-between;
   gap: 30px;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    flex-direction: column;
+  }
 `
 
 export const FormularioItem = styled.div`
