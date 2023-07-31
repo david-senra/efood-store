@@ -53,7 +53,14 @@ export const DivMesmaLinha = styled.div`
 
   @media (max-width: ${breakpoints.tablet}) {
     flex-direction: column;
+    gap: 0px;
   }
+`
+
+export const DivMesmaLinhaSpecial = styled.div`
+  background-color: transparent;
+  display: flex;
+  gap: 34px;
 `
 
 export const DivMesmaLinhaCVV = styled(DivMesmaLinha)`
@@ -61,7 +68,8 @@ export const DivMesmaLinhaCVV = styled(DivMesmaLinha)`
   gap: 30px;
 
   @media (max-width: ${breakpoints.tablet}) {
-    flex-direction: row;
+    flex-direction: column;
+    gap: 0px;
   }
 `
 
@@ -106,6 +114,16 @@ export const InputFormularioMask = styled(InputMask)`
 
 export const InputFormularioMaskCartao = styled(InputFormularioMask)`
   width: 228px;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    width: 100%;
+  }
+`
+
+export const InputFormularioMaskCvv = styled(InputFormularioMask)`
+  @media (max-width: ${breakpoints.tablet}) {
+    width: 120px;
+  }
 `
 
 export const InputFormularioMaskData = styled(InputFormularioMask)`

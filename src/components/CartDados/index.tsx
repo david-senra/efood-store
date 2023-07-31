@@ -318,7 +318,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   </S.ErroMensagem>
                 )}
               </S.FormularioItem>
-              <S.DivMesmaLinha>
+              <S.DivMesmaLinhaSpecial>
                 <S.FormularioItem>
                   <label htmlFor="cepEntrega">CEP</label>
                   <S.InputFormularioMask
@@ -357,7 +357,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
                     </S.ErroMensagem>
                   )}
                 </S.FormularioItem>
-              </S.DivMesmaLinha>
+              </S.DivMesmaLinhaSpecial>
               <S.FormularioItem>
                 <label htmlFor="complementoEntrega">
                   Complemento (opcional)
@@ -439,7 +439,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
                 </S.FormularioItem>
                 <S.FormularioItem>
                   <label htmlFor="numeroCvv">CVV</label>
-                  <S.InputFormularioMask
+                  <S.InputFormularioMaskCvv
                     id="numeroCvv"
                     name="numeroCvv"
                     maskChar={''}
