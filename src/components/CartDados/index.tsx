@@ -183,7 +183,6 @@ const CartDados = ({ tipo }: typeCartDados) => {
   }
 
   const VerificarPaginaEntrega = () => {
-    console.log(dataCep?.localidade)
     cepValido &&
       form.values.cidadeEntrega == '' &&
       form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
@@ -200,8 +199,6 @@ const CartDados = ({ tipo }: typeCartDados) => {
       'numeroEntrega' in form.errors ||
       'cepEntrega' in form.errors
     !formInvalid && setTipoPagina('pagamento')
-    console.log(form.values.cidadeEntrega == '')
-    console.log(form.values.enderecoEntrega == '')
   }
 
   const checkGeneralError = () => {
