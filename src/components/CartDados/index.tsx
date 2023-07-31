@@ -199,9 +199,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
       (!cepValido && 'cidadeEntrega' in form.errors) ||
       'numeroEntrega' in form.errors ||
       'cepEntrega' in form.errors
-    console.log(form.touched)
     !formInvalid && setTipoPagina('pagamento')
-    console.log(cepValido)
     console.log(form.values.cidadeEntrega == '')
     console.log(form.values.enderecoEntrega == '')
   }
