@@ -83,6 +83,8 @@ const CartDados = ({ tipo }: typeCartDados) => {
         .min(2024, 'Insira um ano válido')
         .max(2050, 'Insira um ano válido')
     }),
+    enableReinitialize: true,
+    validateOnChange: true,
     onSubmit: (values) => {
       purchase({
         delivery: {
@@ -181,18 +183,27 @@ const CartDados = ({ tipo }: typeCartDados) => {
   }
 
   const VerificarPaginaEntrega = () => {
+    console.log(dataCep?.localidade)
+    cepValido &&
+      form.values.cidadeEntrega == '' &&
+      form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
+    cepValido &&
+      form.values.enderecoEntrega == '' &&
+      form.setFieldValue('enderecoEntrega', dataCep?.logradouro, true)
     setTentativaPaginaEntrega(true)
-    const input = document.getElementById('myTextInput')
-    input && input.focus()
     const formInvalid =
       'nomeEntrega' in form.errors ||
-      'enderecoEntrega' in form.errors ||
-      'cidadeEntrega' in form.errors ||
+      (cepValido && form.values.enderecoEntrega !== '') ||
+      (!cepValido && 'enderecoEntrega' in form.errors) ||
+      (cepValido && form.values.cidadeEntrega !== '') ||
+      (!cepValido && 'cidadeEntrega' in form.errors) ||
       'numeroEntrega' in form.errors ||
       'cepEntrega' in form.errors
     console.log(form.touched)
     !formInvalid && setTipoPagina('pagamento')
-    console.log(tipoPagina)
+    console.log(cepValido)
+    console.log(form.values.cidadeEntrega == '')
+    console.log(form.values.enderecoEntrega == '')
   }
 
   const checkGeneralError = () => {
@@ -291,6 +302,7 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   id="cidadeEntrega"
                   name="cidadeEntrega"
                   type="text"
+                  onSelect={form.handleChange}
                   onChange={form.handleChange}
                   onBlur={form.handleBlur}
                   onClick={() => {
