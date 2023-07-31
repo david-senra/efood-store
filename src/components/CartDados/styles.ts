@@ -50,6 +50,10 @@ export const DivMesmaLinha = styled.div`
   background-color: transparent;
   display: flex;
   gap: 34px;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    flex-direction: column;
+  }
 `
 
 export const DivMesmaLinhaCVV = styled(DivMesmaLinha)`
@@ -57,7 +61,7 @@ export const DivMesmaLinhaCVV = styled(DivMesmaLinha)`
   gap: 30px;
 
   @media (max-width: ${breakpoints.tablet}) {
-    flex-direction: column;
+    flex-direction: row;
   }
 `
 
