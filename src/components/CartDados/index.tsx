@@ -193,9 +193,9 @@ const CartDados = ({ tipo }: typeCartDados) => {
     const formInvalid =
       'nomeEntrega' in form.errors ||
       (cepValido && form.values.enderecoEntrega !== '') ||
-      (!cepValido && 'enderecoEntrega' in form.errors) ||
+      (!cepValido && form.values.enderecoEntrega == '') ||
       (cepValido && form.values.cidadeEntrega !== '') ||
-      (!cepValido && 'cidadeEntrega' in form.errors) ||
+      (!cepValido && form.values.cidadeEntrega == '') ||
       'numeroEntrega' in form.errors ||
       'cepEntrega' in form.errors
     !formInvalid && setTipoPagina('pagamento')
