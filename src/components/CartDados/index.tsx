@@ -25,6 +25,10 @@ const CartDados = ({ tipo }: typeCartDados) => {
   const [tentativaPaginaEntrega, setTentativaPaginaEntrega] = useState(false)
   const [tipoPagina, setTipoPagina] = useState(tipo)
   const [cepValido, setCepValido] = useState(true)
+  const [logradouroTouched, setLogradouroTouched] = useState(false)
+  const [cidadeTouched, setCidadeTouched] = useState(false)
+  const [logradouroVazio, setLogradouroVazio] = useState(false)
+  const [cidadeVazia, setCidadeVazia] = useState(false)
   const [dataCep, setDataCep] = useState<CepDados>()
   const [purchase, { data, isSuccess, isLoading }] = usePurchaseMutation()
   const dispatch = useDispatch()
@@ -143,6 +147,28 @@ const CartDados = ({ tipo }: typeCartDados) => {
     }
   }, [form.values.cepEntrega])
 
+  useEffect(() => {
+    form.values.cidadeEntrega == ''
+      ? setCidadeVazia(true)
+      : setCidadeVazia(false)
+    setCidadeTouched(true)
+  }, [form.values.cidadeEntrega])
+
+  useEffect(() => {
+    cepValido && setCidadeTouched(false)
+  }, [cepValido])
+
+  useEffect(() => {
+    cepValido && setLogradouroTouched(false)
+  }, [cepValido])
+
+  useEffect(() => {
+    form.values.enderecoEntrega == ''
+      ? setLogradouroVazio(true)
+      : setLogradouroVazio(false)
+    setLogradouroTouched(true)
+  }, [form.values.enderecoEntrega])
+
   const getErrorMessage = (fieldName: string, message?: string) => {
     const isInvalid: boolean = fieldName in form.errors
     const isAttempted: boolean = tentativaPaginaEntrega
@@ -186,18 +212,32 @@ const CartDados = ({ tipo }: typeCartDados) => {
     cepValido &&
       form.values.cidadeEntrega == '' &&
       form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
+
+    cepValido &&
+      form.values.cidadeEntrega !== '' &&
+      cidadeTouched == false &&
+      form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
+
     cepValido &&
       form.values.enderecoEntrega == '' &&
       form.setFieldValue('enderecoEntrega', dataCep?.logradouro, true)
+
+    cepValido &&
+      form.values.enderecoEntrega !== '' &&
+      logradouroTouched == false
+    form.setFieldValue('enderecoEntrega', dataCep?.logradouro, true)
+
     setTentativaPaginaEntrega(true)
     const formInvalid =
       'nomeEntrega' in form.errors ||
-      (cepValido && form.values.enderecoEntrega !== '') ||
-      (!cepValido && form.values.enderecoEntrega == '') ||
-      (cepValido && form.values.cidadeEntrega !== '') ||
-      (!cepValido && form.values.cidadeEntrega == '') ||
+      (cepValido && form.values.enderecoEntrega !== '' && logradouroVazio) ||
+      (!cepValido && 'enderecoEntrega' in form.errors) ||
+      (cepValido && form.values.cidadeEntrega !== '' && cidadeVazia) ||
+      (!cepValido && 'cidadeEntrega' in form.errors) ||
       'numeroEntrega' in form.errors ||
       'cepEntrega' in form.errors
+    console.log(cepValido)
+    console.log(form.errors)
     !formInvalid && setTipoPagina('pagamento')
   }
 
