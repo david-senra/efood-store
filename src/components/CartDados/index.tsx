@@ -15,21 +15,14 @@ export type typeCartDados = {
   tipo: 'entrega' | 'pagamento' | 'realizado'
 }
 
-type CepDados = {
-  localidade: string
-  logradouro: string
-}
-
 const CartDados = ({ tipo }: typeCartDados) => {
   const { itens } = useSelector((state: RootReducer) => state.cart)
   const [tentativaPaginaEntrega, setTentativaPaginaEntrega] = useState(false)
   const [tipoPagina, setTipoPagina] = useState(tipo)
-  const [cepValido, setCepValido] = useState(true)
-  const [logradouroTouched, setLogradouroTouched] = useState(false)
-  const [cidadeTouched, setCidadeTouched] = useState(false)
-  const [logradouroVazio, setLogradouroVazio] = useState(false)
-  const [cidadeVazia, setCidadeVazia] = useState(false)
-  const [dataCep, setDataCep] = useState<CepDados>()
+  const [cepValue, setCepValue] = useState('')
+  const [cepValido, setCepValido] = useState(false)
+  const [logradouroValue, setLogradouroValue] = useState('')
+  const [cidadeValue, setCidadeValue] = useState('')
   const [purchase, { data, isSuccess, isLoading }] = usePurchaseMutation()
   const dispatch = useDispatch()
 
@@ -66,13 +59,12 @@ const CartDados = ({ tipo }: typeCartDados) => {
       nomeEntrega: Yup.string()
         .min(5, 'O nome deve ter pelo menos 5 caracteres')
         .required('Campo obrigatório'),
-      enderecoEntrega: Yup.string().required('Campo obrigatório'),
-      cidadeEntrega: Yup.string().required('Campo obrigatório'),
       numeroEntrega: Yup.number().required('Campo obrigatório'),
-      cepEntrega: Yup.string()
-        .min(9, 'Este CEP não é válido')
-        .test('validação', 'CEP inválido', () => cepValido)
-        .required('Campo obrigatório'),
+      cepEntrega: Yup.string().test(
+        'validação',
+        'CEP inválido',
+        () => cepValido
+      ),
       nomeCartao: Yup.string().required('Campo obrigatório'),
       numeroCvv: Yup.string().min(3, 'Nº Inválido').required('Nº Inválido'),
       numeroCartao: Yup.string()
@@ -132,42 +124,37 @@ const CartDados = ({ tipo }: typeCartDados) => {
   useEffect(() => {
     const fetchCep = async () => {
       const respostaCep = await fetch(
-        `https://viacep.com.br/ws/${form.values.cepEntrega}/json`
+        `https://viacep.com.br/ws/${cepValue}/json`
       )
       const dadosCep = await respostaCep.json()
       if (dadosCep.erro == true) {
         setCepValido(false)
       } else {
         setCepValido(true)
-        setDataCep(dadosCep)
+        setCidadeValue(dadosCep.localidade)
+        setLogradouroValue(dadosCep.logradouro)
       }
     }
-    if (form.values.cepEntrega.length == 9) {
+    if (cepValue.length == 9) {
       fetchCep()
+    } else {
+      setCepValido(false)
     }
-  }, [form.values.cepEntrega])
+  }, [cepValue])
 
   useEffect(() => {
-    form.values.cidadeEntrega == ''
-      ? setCidadeVazia(true)
-      : setCidadeVazia(false)
-    setCidadeTouched(true)
-  }, [form.values.cidadeEntrega])
+    const elementoCidade: HTMLInputElement = document.getElementById(
+      'cidadeEntrega'
+    ) as HTMLInputElement
+    if (elementoCidade) elementoCidade.value = cidadeValue
+  }, [cidadeValue])
 
   useEffect(() => {
-    cepValido && setCidadeTouched(false)
-  }, [cepValido])
-
-  useEffect(() => {
-    cepValido && setLogradouroTouched(false)
-  }, [cepValido])
-
-  useEffect(() => {
-    form.values.enderecoEntrega == ''
-      ? setLogradouroVazio(true)
-      : setLogradouroVazio(false)
-    setLogradouroTouched(true)
-  }, [form.values.enderecoEntrega])
+    const elementoLogradouro: HTMLInputElement = document.getElementById(
+      'enderecoEntrega'
+    ) as HTMLInputElement
+    if (elementoLogradouro) elementoLogradouro.value = logradouroValue
+  }, [logradouroValue])
 
   const getErrorMessage = (fieldName: string, message?: string) => {
     const isInvalid: boolean = fieldName in form.errors
@@ -190,6 +177,37 @@ const CartDados = ({ tipo }: typeCartDados) => {
     return hasError
   }
 
+  const checkEnderecoHasError = (fieldName: string) => {
+    const objetoInputEndereco: HTMLInputElement = document.getElementById(
+      fieldName
+    ) as HTMLInputElement
+    const isInvalid = objetoInputEndereco && objetoInputEndereco.value == ''
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const hasError = isInvalid && isAttempted
+    return hasError
+  }
+
+  const checkCidadeHasError = (fieldName: string) => {
+    const objetoInputCidade: HTMLInputElement = document.getElementById(
+      fieldName
+    ) as HTMLInputElement
+    const isInvalid = objetoInputCidade && objetoInputCidade.value == ''
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const hasError = isInvalid && isAttempted
+    return hasError
+  }
+
+  const checkCepHasError = (fieldName: string) => {
+    const objetoInputCep: HTMLInputElement = document.getElementById(
+      fieldName
+    ) as HTMLInputElement
+    const isInvalid =
+      objetoInputCep && (objetoInputCep.value == '' || !cepValido)
+    const isAttempted: boolean = tentativaPaginaEntrega
+    const hasError = isInvalid && isAttempted
+    return hasError
+  }
+
   const checkInputhasErrorPagamento = (fieldName: string) => {
     const isInvalid: boolean = fieldName in form.errors
     const isAttempted: boolean = form.submitCount > 0
@@ -199,45 +217,46 @@ const CartDados = ({ tipo }: typeCartDados) => {
 
   const checkDeliveryError = () => {
     const isAttempted: boolean = tentativaPaginaEntrega
+    const inputEnderecoEntrega: HTMLInputElement = document.getElementById(
+      'enderecoEntrega'
+    ) as HTMLInputElement
+    const inputCidadeEntrega: HTMLInputElement = document.getElementById(
+      'cidadeEntrega'
+    ) as HTMLInputElement
+    const inputCepEntrega: HTMLInputElement = document.getElementById(
+      'cepEntrega'
+    ) as HTMLInputElement
     const formInvalid =
       'nomeEntrega' in form.errors ||
-      'enderecoEntrega' in form.errors ||
-      'cidadeEntrega' in form.errors ||
-      'numeroEntrega' in form.errors ||
-      'cepEntrega' in form.errors
+      (inputEnderecoEntrega && inputEnderecoEntrega.value == '') ||
+      (inputCidadeEntrega && inputCidadeEntrega.value == '') ||
+      (inputCepEntrega && inputCepEntrega.value == '') ||
+      !cepValido ||
+      'numeroEntrega' in form.errors
     return isAttempted && formInvalid
   }
 
   const VerificarPaginaEntrega = () => {
-    cepValido &&
-      form.values.cidadeEntrega == '' &&
-      form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
-
-    cepValido &&
-      form.values.cidadeEntrega !== '' &&
-      cidadeTouched == false &&
-      form.setFieldValue('cidadeEntrega', dataCep?.localidade, true)
-
-    cepValido &&
-      form.values.enderecoEntrega == '' &&
-      form.setFieldValue('enderecoEntrega', dataCep?.logradouro, true)
-
-    cepValido &&
-      form.values.enderecoEntrega !== '' &&
-      logradouroTouched == false
-    form.setFieldValue('enderecoEntrega', dataCep?.logradouro, true)
-
     setTentativaPaginaEntrega(true)
+    const inputEnderecoEntrega: HTMLInputElement = document.getElementById(
+      'enderecoEntrega'
+    ) as HTMLInputElement
+    const inputCidadeEntrega: HTMLInputElement = document.getElementById(
+      'cidadeEntrega'
+    ) as HTMLInputElement
+    const inputCepEntrega: HTMLInputElement = document.getElementById(
+      'cepEntrega'
+    ) as HTMLInputElement
     const formInvalid =
       'nomeEntrega' in form.errors ||
-      (cepValido && form.values.enderecoEntrega !== '' && logradouroVazio) ||
-      (!cepValido && 'enderecoEntrega' in form.errors) ||
-      (cepValido && form.values.cidadeEntrega !== '' && cidadeVazia) ||
-      (!cepValido && 'cidadeEntrega' in form.errors) ||
-      'numeroEntrega' in form.errors ||
-      'cepEntrega' in form.errors
-    console.log(cepValido)
-    console.log(form.errors)
+      (inputEnderecoEntrega && inputEnderecoEntrega.value == '') ||
+      (inputCidadeEntrega && inputCidadeEntrega.value == '') ||
+      (inputCepEntrega && inputCepEntrega.value == '') ||
+      !cepValido ||
+      'numeroEntrega' in form.errors
+    !formInvalid && form.setFieldValue('enderecoEntrega', logradouroValue)
+    !formInvalid && form.setFieldValue('cidadeEntrega', cidadeValue)
+    !formInvalid && form.setFieldValue('cepEntrega', cepValue)
     !formInvalid && setTipoPagina('pagamento')
   }
 
@@ -302,33 +321,22 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   id="enderecoEntrega"
                   name="enderecoEntrega"
                   type="text"
-                  onChange={form.handleChange}
-                  onBlur={form.handleBlur}
-                  onClick={() => {
-                    cepValido &&
-                      dataCep &&
-                      (form.values.enderecoEntrega = dataCep.logradouro)
-                    setDataCep({
-                      localidade: '',
-                      logradouro: ''
-                    })
-                  }}
-                  value={
-                    cepValido && dataCep && dataCep.localidade != ''
-                      ? dataCep.logradouro
-                      : form.values.enderecoEntrega
+                  onSelect={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLogradouroValue(e.target.value)
                   }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLogradouroValue(e.target.value)
+                  }
+                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLogradouroValue(e.target.value)
+                  }
+                  value={logradouroValue}
                   className={
-                    checkInputhasError('enderecoEntrega') ? 'error' : ''
+                    checkEnderecoHasError('enderecoEntrega') ? 'error' : ''
                   }
                 />
-                {'enderecoEntrega' in form.errors && tentativaPaginaEntrega && (
-                  <S.ErroMensagem>
-                    {getErrorMessage(
-                      'enderecoEntrega',
-                      form.errors.enderecoEntrega
-                    )}
-                  </S.ErroMensagem>
+                {logradouroValue == '' && tentativaPaginaEntrega && (
+                  <S.ErroMensagem>Campo Obrigatório.</S.ErroMensagem>
                 )}
               </S.FormularioItem>
               <S.FormularioItem>
@@ -337,32 +345,22 @@ const CartDados = ({ tipo }: typeCartDados) => {
                   id="cidadeEntrega"
                   name="cidadeEntrega"
                   type="text"
-                  onSelect={form.handleChange}
-                  onChange={form.handleChange}
-                  onBlur={form.handleBlur}
-                  onClick={() => {
-                    cepValido &&
-                      dataCep &&
-                      (form.values.cidadeEntrega = dataCep.localidade)
-                    setDataCep({
-                      localidade: '',
-                      logradouro: ''
-                    })
-                  }}
-                  value={
-                    cepValido && dataCep && dataCep.localidade != ''
-                      ? dataCep.localidade
-                      : form.values.cidadeEntrega
+                  onSelect={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCidadeValue(e.target.value)
                   }
-                  className={checkInputhasError('cidadeEntrega') ? 'error' : ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCidadeValue(e.target.value)
+                  }
+                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setCidadeValue(e.target.value)
+                  }
+                  value={cidadeValue}
+                  className={
+                    checkCidadeHasError('cidadeEntrega') ? 'error' : ''
+                  }
                 />
-                {'cidadeEntrega' in form.errors && tentativaPaginaEntrega && (
-                  <S.ErroMensagem>
-                    {getErrorMessage(
-                      'cidadeEntrega',
-                      form.errors.cidadeEntrega
-                    )}
-                  </S.ErroMensagem>
+                {cidadeValue == '' && tentativaPaginaEntrega && (
+                  <S.ErroMensagem>Campo Obrigatório.</S.ErroMensagem>
                 )}
               </S.FormularioItem>
               <S.DivMesmaLinhaSpecial>
@@ -373,13 +371,17 @@ const CartDados = ({ tipo }: typeCartDados) => {
                     name="cepEntrega"
                     mask="99999-999"
                     maskChar={''}
-                    onChange={form.handleChange}
-                    onBlur={form.handleBlur}
-                    className={checkInputhasError('cepEntrega') ? 'error' : ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setCepValue(e.target.value)
+                    }
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setCepValue(e.target.value)
+                    }
+                    className={checkCepHasError('cepEntrega') ? 'error' : ''}
                   />
-                  {'cepEntrega' in form.errors && tentativaPaginaEntrega && (
+                  {(cepValue == '' || !cepValido) && tentativaPaginaEntrega && (
                     <S.ErroMensagem>
-                      {getErrorMessage('cepEntrega', form.errors.cepEntrega)}
+                      {cepValue == '' ? 'Campo Obrigatório' : 'CEP inválido'}
                     </S.ErroMensagem>
                   )}
                 </S.FormularioItem>
